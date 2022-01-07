@@ -3563,8 +3563,22 @@ class _DeleteTextAction<T extends DirectionalTextEditingIntent> extends ContextA
     );
   }
 
+  bool get _shouldIgnoreEvent {
+    final TextRange composing = state._value.composing;
+    return defaultTargetPlatform == TargetPlatform.macOS && composing.isValid && !composing.isCollapsed;
+  }
+
+  @override
+  bool consumesKey(T intent) {
+    return !_shouldIgnoreEvent;
+  }
+
   @override
   Object? invoke(T intent, [BuildContext? context]) {
+    if (_shouldIgnoreEvent) {
+      return null;
+    }
+
     final TextSelection selection = state._value.selection;
     assert(selection.isValid);
 
